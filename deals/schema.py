@@ -3,6 +3,7 @@ from django.db.models import fields
 import graphene
 from graphene_django import DjangoObjectType
 from .models import Deal
+
 #debug
 from .tests.deals_data import mock_data
 
@@ -46,6 +47,7 @@ def to_full_deal_group(deals_list, start, deals_group_size):
 class Query(graphene.ObjectType):
     one_per_store = graphene.List(FreeDeal)
     deals = graphene.Field(FullDealGroup, start=graphene.Int())
+    deals_filtered_by_store = graphene.Field(FullDealGroup, start=graphene.Int(), storeID=graphene.String())
 
     #debug
     # create_records = graphene.String()
@@ -59,6 +61,15 @@ class Query(graphene.ObjectType):
 
     def resolve_deals(root, info, start):
         deals_list = Deal.objects.all()
+        return to_full_deal_group(deals_list, start, DEALS_PER_QUERY)
+
+    def resolve_deals_filtered_by_store(root, info, start, storeID):
+
+        if storeID not in ['1', '7', '11']:
+            raise Exception('Invalid Store')
+        
+        deals_list = Deal.objects.filter(storeID=storeID)
+
         return to_full_deal_group(deals_list, start, DEALS_PER_QUERY)
 
 
