@@ -1,10 +1,10 @@
 import graphene
 from graphene.types import schema
-import accounts.schema
+import accounts.schema, deals.schema
 import graphql_jwt
 
-class RootQuery(graphene.ObjectType):
-  helloQuery = graphene.String(default_value='Hello Query!')
+class RootQuery(deals.schema.Query, graphene.ObjectType):
+  pass
 
 class RootMutation(accounts.schema.Mutation, graphene.ObjectType):
   token_auth = graphql_jwt.ObtainJSONWebToken.Field()
