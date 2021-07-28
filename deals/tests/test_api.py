@@ -26,6 +26,7 @@ class DealsQueriesTest(GraphQLTestCase):
             )
     
     # login not required
+
     def test_one_per_store(self):
 
         query_node = 'onePerStore'
@@ -62,6 +63,125 @@ class DealsQueriesTest(GraphQLTestCase):
         self.assertEqual(deals[2]['title'], "Deus Ex: Human Revolution - Director's Cut")
         
 
-    
+    # login required
+
+    def test_deals_with_start_0(self):
+
+        response = self.query(
+            '''
+                {
+                    deals(start: 0) {
+                        dealsList {
+                            title
+                            storeID
+                            salePrice
+                            normalPrice
+                            thumb
+                            dealID
+                            savings
+                            steamRatingText
+                            releaseDate
+                            dealRating
+                        }
+                        isEnd
+                    }
+                }
+            '''
+        )
+
+        self.assertResponseNoErrors(response)
+
+        content = json.loads(response.content)
+
+        self.assertIn('data', content)
+        self.assertIn('deals', content['data'])
+        self.assertIn('dealsList', content['data']['deals'])
+        self.assertIn('isEnd', content['data']['deals'])
+
+        deals = content['data']['deals']['dealsList']
+
+        self.assertLessEqual(len(deals), 8)
+
+        isEnd = content['data']['deals']['isEnd']
+        self.assertFalse(isEnd)
+
+    def test_deals_with_start_7(self):
+        response = self.query(
+            '''
+                {
+                    deals(start: 8) {
+                        dealsList {
+                            title
+                            storeID
+                            salePrice
+                            normalPrice
+                            thumb
+                            dealID
+                            savings
+                            steamRatingText
+                            releaseDate
+                            dealRating
+                        }
+                        isEnd
+                    }
+                }
+            '''
+        )
+
+        self.assertResponseNoErrors(response)
+
+        content = json.loads(response.content)
+
+        self.assertIn('data', content)
+        self.assertIn('deals', content['data'])
+        self.assertIn('dealsList', content['data']['deals'])
+        self.assertIn('isEnd', content['data']['deals'])
+
+        deals = content['data']['deals']['dealsList']
+
+        self.assertLessEqual(len(deals), 8)
+
+        isEnd = content['data']['deals']['isEnd']
+        self.assertTrue(isEnd)
+
+    def test_deals_with_start_out_of_bound(self):
+        response = self.query(
+            '''
+                {
+                    deals(start: 17) {
+                        dealsList {
+                            title
+                            storeID
+                            salePrice
+                            normalPrice
+                            thumb
+                            dealID
+                            savings
+                            steamRatingText
+                            releaseDate
+                            dealRating
+                        }
+                        isEnd
+                    }
+                }
+            '''
+        )
+
+        self.assertResponseHasErrors(response)
+
+    def test_deals_filtered_by_store(self):
+        pass
+
+    def test_deals_filtered_by_price_range(self):
+        pass
+
+    def test_deals_sorted_by_price(self):
+        pass
+
+    def test_deals_sorted_by_savings(self):
+        pass
+
+    def test_deals_sorted_by_deal_rating(self):
+        pass
     
 
