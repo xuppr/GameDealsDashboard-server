@@ -21,6 +21,28 @@ class FullDealGroup(graphene.ObjectType):
     deals_list = graphene.List(FullDeal)
     is_end = graphene.Boolean(default_value=False)
 
+
+def to_full_deal_group(deals_list, start, deals_group_size):
+    deals_count = len(deals_list)
+
+    if start >= deals_count:
+        raise Exception('Start index out of bound')
+
+    end_index = start + deals_group_size
+
+    is_end = False
+
+    if end_index >= deals_count:
+        is_end = True
+        out_list = deals_list[start:]
+
+    else:
+        out_list = deals_list[start:end_index]
+
+    return FullDealGroup(deals_list=out_list, is_end=is_end)
+
+
+
 class Query(graphene.ObjectType):
     one_per_store = graphene.List(FreeDeal)
     deals = graphene.Field(FullDealGroup, start=graphene.Int())
@@ -36,26 +58,8 @@ class Query(graphene.ObjectType):
         return [steam_deal, gog_deal, humble_deal]
 
     def resolve_deals(root, info, start):
-
-        deals_count = Deal.objects.count()
-
-        if start >= deals_count:
-            raise Exception('Start index out of bound')
-        
-        end_index = start + DEALS_PER_QUERY
-        
-        is_end = False
-
-        all_deals = Deal.objects.all()
-        
-        if end_index >= deals_count:
-            is_end = True
-            deals_list = all_deals[start:]
-
-        else:
-            deals_list = all_deals[start:end_index]
-
-        return FullDealGroup(deals_list=deals_list, is_end=is_end)
+        deals_list = Deal.objects.all()
+        return to_full_deal_group(deals_list, start, DEALS_PER_QUERY)
 
 
     #debug
