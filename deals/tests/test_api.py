@@ -28,7 +28,7 @@ class DealsQueriesTest(GraphQLTestCase):
     # login not required
     def test_one_per_store(self):
 
-        dealsNode = 'onePerStore'
+        query_node = 'onePerStore'
 
         response = self.query(
             '''
@@ -52,16 +52,16 @@ class DealsQueriesTest(GraphQLTestCase):
 
         data = content['data']
 
-        self.assertIn(dealsNode, data)
-        self.assertLess(len(data[dealsNode]), 4)
+        self.assertIn(query_node, data)
+        self.assertLess(len(data[query_node]), 4)
 
-        deals = data[dealsNode]
+        deals = data[query_node]
         
         self.assertEqual(deals[0]['title'], "Tumblestone")
         self.assertEqual(deals[1]['title'], "Freedom Force")
         self.assertEqual(deals[2]['title'], "Deus Ex: Human Revolution - Director's Cut")
         
 
-
+    
     
 
