@@ -1,4 +1,5 @@
 import json
+from django.http import response
 from graphene_django.utils.testing import GraphQLTestCase
 from ..models import Deal
 from .deals_data import mock_data
@@ -170,7 +171,71 @@ class DealsQueriesTest(GraphQLTestCase):
         self.assertResponseHasErrors(response)
 
     def test_deals_filtered_by_store(self):
-        pass
+        response = self.query(
+            '''
+                {
+                    dealsFilteredByStore(start: 0, storeID: "7"){
+                        dealsList {
+                            title
+                            storeID
+                            salePrice
+                            normalPrice
+                            thumb
+                            dealID
+                            savings
+                            steamRatingText
+                            releaseDate
+                            dealRating
+                        }
+                        isEnd
+                    }
+                }
+            '''
+        )
+
+        self.assertResponseNoErrors(response)
+
+        content = json.loads(response.content)
+
+        self.assertIn('data', content)
+        self.assertIn('dealsFilteredByStore', content['data'])
+        self.assertIn('dealsList', content['data']['dealsFilteredByStore'])
+        self.assertIn('isEnd', content['data']['dealsFilteredByStore'])
+
+        deals = content['data']['dealsFilteredByStore']['dealsList']
+
+        self.assertLessEqual(len(deals), 8)
+
+        isEnd = content['data']['dealsFilteredByStore']['isEnd']
+        self.assertTrue(isEnd)
+
+        for deal in deals:
+            self.assertEqual(deal['storeID'], '7')
+
+    def test_deals_filtered_by_store_with_invalid_store_id(self):
+        response = self.query(
+            '''
+                {
+                    deals_filtered_by_store(start: 0, storeID: "5"){
+                        dealsList {
+                            title
+                            storeID
+                            salePrice
+                            normalPrice
+                            thumb
+                            dealID
+                            savings
+                            steamRatingText
+                            releaseDate
+                            dealRating
+                        }
+                        isEnd
+                    }
+                }
+            '''
+        )
+
+        self.assertResponseHasErrors(response)
 
     def test_deals_filtered_by_price_range(self):
         pass
