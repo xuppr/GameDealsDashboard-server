@@ -238,7 +238,67 @@ class DealsQueriesTest(GraphQLTestCase):
         self.assertResponseHasErrors(response)
 
     def test_deals_filtered_by_price_range(self):
-        pass
+        response = self.query(
+            '''
+                {
+                    dealsFilteredByPriceRange(start: 0, lowPrice: 1.99, highPrice: 5.0){
+                        dealsList {
+                            title
+                            storeID
+                            salePrice
+                            normalPrice
+                            thumb
+                            dealID
+                            savings
+                            steamRatingText
+                            releaseDate
+                            dealRating
+                        }
+                        isEnd
+                    }
+                }
+            '''
+        )
+
+        self.assertResponseNoErrors(response)
+
+        content = json.loads(response.content)
+        deals = content['data']['dealsFilteredByPriceRange']['dealsList']
+
+        self.assertEqual(len(deals), 7)
+
+        self.assertEqual(deals[0]['dealID'], "mU%2FbH6z0MsHtcyqBBnv1C29aei%2FU0ZcsW0tNaZjC3xQ%3D")
+        self.assertEqual(deals[1]['dealID'], "dJNCeHkZV3iaXZQFBSpYh3B2tz6ZuMvBaFpI6d1QYiU%3D")
+        self.assertEqual(deals[2]['dealID'], "%2BriI1%2B63K5PCBDSW7YcjfrFIhgc0u2sIkmRpwojt8l4%3D")
+        self.assertEqual(deals[3]['dealID'], "rfnxxA9yFZZ%2BFfxDGsRqLQQubn17Q8NB0SHOChnsL%2BI%3D")
+        self.assertEqual(deals[4]['dealID'], "tzAVXMgjTwh5hk442e%2FDLgK57c%2FSv4XhH%2B67K3Xvk4k%3D")
+        self.assertEqual(deals[5]['dealID'], "ICV0L0NmwniVHpc4NjfQsDO5gRILOIkqPz05jfxFtCM%3D")
+        self.assertEqual(deals[6]['dealID'], "eKcwMzD%2Bsr2BhW%2BcIb%2FTR1mcNf49dlln2q3p1n1igkw%3D")
+
+    def test_deals_filtered_by_price_range_with_invalid_range(self):
+        response = self.query(
+            '''
+                {
+                    dealsFilteredByPriceRange(start: 0, lowPrice: 5.99, highPrice: 1.0){
+                        dealsList {
+                            title
+                            storeID
+                            salePrice
+                            normalPrice
+                            thumb
+                            dealID
+                            savings
+                            steamRatingText
+                            releaseDate
+                            dealRating
+                        }
+                        isEnd
+                    }
+                }
+            '''
+        )
+
+        self.assertResponseHasErrors(response)
 
     def test_deals_sorted_by_price(self):
         pass
