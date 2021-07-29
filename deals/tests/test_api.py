@@ -375,6 +375,40 @@ class DealsQueriesTest(GraphQLTestCase):
             last_savings = savings
 
     def test_deals_sorted_by_deal_rating(self):
-        pass
+        response = self.query(
+            '''
+                {
+                    dealsSortedByDealRating(start: 0){
+                        dealsList {
+                            title
+                            storeID
+                            salePrice
+                            normalPrice
+                            thumb
+                            dealID
+                            savings
+                            steamRatingText
+                            releaseDate
+                            dealRating
+                        }
+                        isEnd
+                    }
+                }
+            '''
+        )
+
+        self.assertResponseNoErrors(response)
+
+        content = json.loads(response.content)
+        deals = content['data']['dealsSortedByDealRating']['dealsList']
+
+        self.assertLessEqual(len(deals), 8)
+
+        last_rating = deals[0]['dealRating']
+
+        for deal in deals[1:]:
+            rating = deal['dealRating']
+            self.assertLessEqual(rating, last_rating)
+            last_rating = rating
     
 
