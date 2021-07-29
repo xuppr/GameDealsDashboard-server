@@ -301,7 +301,43 @@ class DealsQueriesTest(GraphQLTestCase):
         self.assertResponseHasErrors(response)
 
     def test_deals_sorted_by_price(self):
-        pass
+        response = self.query(
+            '''
+                {
+                    dealsSortedByPrice(start: 0){
+                        dealsList {
+                            title
+                            storeID
+                            salePrice
+                            normalPrice
+                            thumb
+                            dealID
+                            savings
+                            steamRatingText
+                            releaseDate
+                            dealRating
+                        }
+                        isEnd
+                    }
+                }
+            '''
+        )
+
+        self.assertResponseNoErrors(response)
+
+        self.assertResponseNoErrors(response)
+
+        content = json.loads(response.content)
+        deals = content['data']['dealsSortedByPrice']['dealsList']
+
+        self.assertLessEqual(len(deals), 8)
+
+        last_price = deals[0]['salePrice']
+
+        for deal in deals[1:]:
+            price = deal['salePrice']
+            self.assertGreaterEqual(price, last_price)
+            last_price = price
 
     def test_deals_sorted_by_savings(self):
         pass
