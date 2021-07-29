@@ -48,6 +48,8 @@ class Query(graphene.ObjectType):
     one_per_store = graphene.List(FreeDeal)
     deals = graphene.Field(FullDealGroup, start=graphene.Int())
     deals_filtered_by_store = graphene.Field(FullDealGroup, start=graphene.Int(), storeID=graphene.String())
+    deals_filtered_by_price_range = graphene.Field(
+        FullDealGroup, start=graphene.Int(), low_price=graphene.Float(), high_price=graphene.Float())
 
     #debug
     # create_records = graphene.String()
@@ -61,6 +63,7 @@ class Query(graphene.ObjectType):
 
     def resolve_deals(root, info, start):
         deals_list = Deal.objects.all()
+
         return to_full_deal_group(deals_list, start, DEALS_PER_QUERY)
 
     def resolve_deals_filtered_by_store(root, info, start, storeID):
@@ -69,6 +72,12 @@ class Query(graphene.ObjectType):
             raise Exception('Invalid Store')
         
         deals_list = Deal.objects.filter(storeID=storeID)
+
+        return to_full_deal_group(deals_list, start, DEALS_PER_QUERY)
+
+    def resolve_deals_filtered_by_price_range(root, info, start, low_price, high_price):
+        
+        deals_list = Deal.objects.filter(salePrice__range=[low_price, high_price])
 
         return to_full_deal_group(deals_list, start, DEALS_PER_QUERY)
 
