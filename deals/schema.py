@@ -1,6 +1,7 @@
 from django.db import models
 from django.db.models import fields
 import graphene
+from graphql_jwt.decorators import login_required
 from graphene_django import DjangoObjectType
 from .models import Deal
 
@@ -44,7 +45,7 @@ def to_full_deal_group(deals_list, start, deals_group_size):
 
 
 
-class Query(graphene.ObjectType):
+class Query(graphene.AbstractType):
     one_per_store = graphene.List(FreeDeal)
     deals = graphene.Field(FullDealGroup, start=graphene.Int())
     deals_filtered_by_store = graphene.Field(FullDealGroup, start=graphene.Int(), storeID=graphene.String())
@@ -63,6 +64,7 @@ class Query(graphene.ObjectType):
 
         return [steam_deal, gog_deal, humble_deal]
 
+    @login_required
     def resolve_deals(root, info, start):
         deals_list = Deal.objects.all()
 
