@@ -3,7 +3,7 @@ from django.db import models
 # Create your models here.
 class Deal(models.Model):
     title = models.CharField(max_length=255, null=True)
-    dealID = models.CharField(max_length=255, unique=True)
+    dealID = models.CharField(max_length=255, unique=True, default='1')
     storeID = models.CharField(max_length=5, null=True)
     salePrice = models.FloatField(null=True)
     normalPrice = models.FloatField(null=True)
