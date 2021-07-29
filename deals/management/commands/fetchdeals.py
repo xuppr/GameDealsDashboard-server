@@ -1,5 +1,6 @@
 from django.core.management.base import BaseCommand
 from ...models import Deal
+import requests
 
 def make_records(deals_data):
     
@@ -25,4 +26,12 @@ API_ENDPOINT = 'https://www.cheapshark.com/api/1.0/deals?storeID=1,7,11&sortBy=r
 class Command(BaseCommand):
 
     def handle(self, *args, **options):
-        print('fetch deals command ok')
+        
+        response = requests.get(API_ENDPOINT)
+
+        if response.status_code != 200:
+            raise Exception("Cannot fetch deals from external api")
+        
+        deals_data = response.json()
+
+        make_records(deals_data=deals_data)
