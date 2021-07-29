@@ -10,7 +10,7 @@ class Deal(models.Model):
     savings = models.FloatField(null=True)
     steamRatingText = models.CharField(max_length=30, null=True)
     releaseDate = models.BigIntegerField(null=True)
-    dealRating = models.CharField(max_length=5, null=True)
+    dealRating = models.FloatField(null=True)
     thumb = models.CharField(max_length=255, null=True)
 
     def __str__(self):
