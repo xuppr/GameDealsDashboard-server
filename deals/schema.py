@@ -52,6 +52,7 @@ class Query(graphene.ObjectType):
         FullDealGroup, start=graphene.Int(), low_price=graphene.Float(), high_price=graphene.Float())
     deals_sorted_by_price = graphene.Field(FullDealGroup, start=graphene.Int())
     deals_sorted_by_savings = graphene.Field(FullDealGroup, start=graphene.Int())
+    deals_sorted_by_deal_rating = graphene.Field(FullDealGroup, start=graphene.Int())
     #debug
     # create_records = graphene.String()
 
@@ -90,6 +91,11 @@ class Query(graphene.ObjectType):
 
     def resolve_deals_sorted_by_savings(root, info, start):
         deals_list = Deal.objects.order_by('-savings')
+
+        return to_full_deal_group(deals_list, start, DEALS_PER_QUERY)
+
+    def resolve_deals_sorted_by_deal_rating(root, info, start):
+        deals_list = Deal.objects.order_by('-dealRating')
 
         return to_full_deal_group(deals_list, start, DEALS_PER_QUERY)
 
