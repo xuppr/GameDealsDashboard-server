@@ -3,6 +3,8 @@ from django.http import response
 from graphene_django.utils.testing import GraphQLTestCase
 from ..models import Deal
 from .deals_data import mock_data
+from django.contrib.auth.models import User
+from graphql_jwt.shortcuts import get_token
 
 class DealsQueriesTest(GraphQLTestCase):
 
@@ -25,6 +27,9 @@ class DealsQueriesTest(GraphQLTestCase):
                 dealRating = deal['dealRating'],
                 thumb = deal['thumb']
             )
+
+        cls.user = User.objects.create(username='mockuser', password="mockpassword")
+    
     
     # login not required
 
@@ -67,6 +72,9 @@ class DealsQueriesTest(GraphQLTestCase):
     # login required
 
     def test_deal_by_id(self):
+        token   = get_token(self.user)
+        headers = {"HTTP_AUTHORIZATION": f"JWT {token}"}
+
         response = self.query(
             '''
                 {
@@ -85,7 +93,8 @@ class DealsQueriesTest(GraphQLTestCase):
                         
                     }
                 }
-            '''
+            ''',
+            headers=headers
         )
 
         self.assertResponseNoErrors(response)
@@ -101,6 +110,8 @@ class DealsQueriesTest(GraphQLTestCase):
         self.assertEqual(deal['title'], "The Office Quest")
 
     def test_deals_with_start_0(self):
+        token   = get_token(self.user)
+        headers = {"HTTP_AUTHORIZATION": f"JWT {token}"}
 
         response = self.query(
             '''
@@ -121,7 +132,8 @@ class DealsQueriesTest(GraphQLTestCase):
                         isEnd
                     }
                 }
-            '''
+            ''',
+            headers=headers
         )
 
         self.assertResponseNoErrors(response)
@@ -141,6 +153,9 @@ class DealsQueriesTest(GraphQLTestCase):
         self.assertFalse(isEnd)
 
     def test_deals_with_start_8(self):
+        token   = get_token(self.user)
+        headers = {"HTTP_AUTHORIZATION": f"JWT {token}"}
+
         response = self.query(
             '''
                 {
@@ -160,7 +175,8 @@ class DealsQueriesTest(GraphQLTestCase):
                         isEnd
                     }
                 }
-            '''
+            ''',
+            headers=headers
         )
 
         self.assertResponseNoErrors(response)
@@ -180,6 +196,9 @@ class DealsQueriesTest(GraphQLTestCase):
         self.assertTrue(isEnd)
 
     def test_deals_with_start_out_of_bound(self):
+        token   = get_token(self.user)
+        headers = {"HTTP_AUTHORIZATION": f"JWT {token}"}
+
         response = self.query(
             '''
                 {
@@ -199,12 +218,16 @@ class DealsQueriesTest(GraphQLTestCase):
                         isEnd
                     }
                 }
-            '''
+            ''',
+            headers=headers
         )
 
         self.assertResponseHasErrors(response)
 
     def test_deals_filtered_by_store(self):
+        token   = get_token(self.user)
+        headers = {"HTTP_AUTHORIZATION": f"JWT {token}"}
+
         response = self.query(
             '''
                 {
@@ -224,7 +247,8 @@ class DealsQueriesTest(GraphQLTestCase):
                         isEnd
                     }
                 }
-            '''
+            ''',
+            headers=headers
         )
 
         self.assertResponseNoErrors(response)
@@ -247,6 +271,9 @@ class DealsQueriesTest(GraphQLTestCase):
             self.assertEqual(deal['storeID'], '7')
 
     def test_deals_filtered_by_store_with_invalid_store_id(self):
+        token   = get_token(self.user)
+        headers = {"HTTP_AUTHORIZATION": f"JWT {token}"}
+
         response = self.query(
             '''
                 {
@@ -266,12 +293,16 @@ class DealsQueriesTest(GraphQLTestCase):
                         isEnd
                     }
                 }
-            '''
+            ''',
+            headers=headers
         )
 
         self.assertResponseHasErrors(response)
 
     def test_deals_filtered_by_price_range(self):
+        token   = get_token(self.user)
+        headers = {"HTTP_AUTHORIZATION": f"JWT {token}"}
+
         response = self.query(
             '''
                 {
@@ -291,7 +322,8 @@ class DealsQueriesTest(GraphQLTestCase):
                         isEnd
                     }
                 }
-            '''
+            ''',
+            headers=headers
         )
 
         self.assertResponseNoErrors(response)
@@ -310,6 +342,9 @@ class DealsQueriesTest(GraphQLTestCase):
         self.assertEqual(deals[6]['dealID'], "eKcwMzD%2Bsr2BhW%2BcIb%2FTR1mcNf49dlln2q3p1n1igkw%3D")
 
     def test_deals_filtered_by_price_range_with_invalid_range(self):
+        token   = get_token(self.user)
+        headers = {"HTTP_AUTHORIZATION": f"JWT {token}"}
+
         response = self.query(
             '''
                 {
@@ -329,12 +364,16 @@ class DealsQueriesTest(GraphQLTestCase):
                         isEnd
                     }
                 }
-            '''
+            ''',
+            headers=headers
         )
 
         self.assertResponseHasErrors(response)
 
     def test_deals_sorted_by_price(self):
+        token   = get_token(self.user)
+        headers = {"HTTP_AUTHORIZATION": f"JWT {token}"}
+
         response = self.query(
             '''
                 {
@@ -354,7 +393,8 @@ class DealsQueriesTest(GraphQLTestCase):
                         isEnd
                     }
                 }
-            '''
+            ''',
+            headers=headers
         )
 
         self.assertResponseNoErrors(response)
@@ -372,6 +412,9 @@ class DealsQueriesTest(GraphQLTestCase):
             last_price = price
 
     def test_deals_sorted_by_savings(self):
+        token   = get_token(self.user)
+        headers = {"HTTP_AUTHORIZATION": f"JWT {token}"}
+
         response = self.query(
             '''
                 {
@@ -391,7 +434,8 @@ class DealsQueriesTest(GraphQLTestCase):
                         isEnd
                     }
                 }
-            '''
+            ''',
+            headers=headers
         )
 
         self.assertResponseNoErrors(response)
@@ -409,6 +453,9 @@ class DealsQueriesTest(GraphQLTestCase):
             last_savings = savings
 
     def test_deals_sorted_by_deal_rating(self):
+        token   = get_token(self.user)
+        headers = {"HTTP_AUTHORIZATION": f"JWT {token}"}
+
         response = self.query(
             '''
                 {
@@ -428,7 +475,8 @@ class DealsQueriesTest(GraphQLTestCase):
                         isEnd
                     }
                 }
-            '''
+            ''',
+            headers=headers
         )
 
         self.assertResponseNoErrors(response)

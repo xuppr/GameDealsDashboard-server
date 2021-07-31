@@ -65,17 +65,19 @@ class Query(graphene.AbstractType):
 
         return [steam_deal, gog_deal, humble_deal]
 
-    # @login_required
+    @login_required
     def resolve_deal_by_id(root, info, id):
         deal = Deal.objects.get(dealID = id)
 
         return deal
 
+    @login_required
     def resolve_deals(root, info, start):
         deals_list = Deal.objects.all()
 
         return to_full_deal_group(deals_list, start, DEALS_PER_QUERY)
 
+    @login_required
     def resolve_deals_filtered_by_store(root, info, start, storeID):
 
         if storeID not in ['1', '7', '11']:
@@ -85,23 +87,26 @@ class Query(graphene.AbstractType):
 
         return to_full_deal_group(deals_list, start, DEALS_PER_QUERY)
 
+    @login_required
     def resolve_deals_filtered_by_price_range(root, info, start, low_price, high_price):
         
         deals_list = Deal.objects.filter(salePrice__range=[low_price, high_price])
 
         return to_full_deal_group(deals_list, start, DEALS_PER_QUERY)
 
+    @login_required
     def resolve_deals_sorted_by_price(root, info, start):
         deals_list = Deal.objects.order_by('salePrice')
 
         return to_full_deal_group(deals_list, start, DEALS_PER_QUERY)
 
-
+    @login_required
     def resolve_deals_sorted_by_savings(root, info, start):
         deals_list = Deal.objects.order_by('-savings')
 
         return to_full_deal_group(deals_list, start, DEALS_PER_QUERY)
 
+    @login_required
     def resolve_deals_sorted_by_deal_rating(root, info, start):
         deals_list = Deal.objects.order_by('-dealRating')
 
