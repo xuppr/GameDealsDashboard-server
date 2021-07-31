@@ -66,6 +66,40 @@ class DealsQueriesTest(GraphQLTestCase):
 
     # login required
 
+    def test_deal_by_id(self):
+        response = self.query(
+            '''
+                {
+                    dealById(id: "IML08yuF8VjsQwlgfgjNDDjw9WCHBN%2FmFAGNhmhlWF4%3D") {
+        
+                        title
+                        storeID
+                        salePrice
+                        normalPrice
+                        thumb
+                        dealID
+                        savings
+                        steamRatingText
+                        releaseDate
+                        dealRating
+                        
+                    }
+                }
+            '''
+        )
+
+        self.assertResponseNoErrors(response)
+
+        content = json.loads(response.content)
+
+        self.assertIn('data', content)
+        self.assertIn('dealById', content['data'])
+
+        deal = content['data']['dealById']
+
+        self.assertIn('title', deal)
+        self.assertEqual(deal['title'], "The Office Quest")
+
     def test_deals_with_start_0(self):
 
         response = self.query(
@@ -106,7 +140,7 @@ class DealsQueriesTest(GraphQLTestCase):
         isEnd = content['data']['deals']['isEnd']
         self.assertFalse(isEnd)
 
-    def test_deals_with_start_7(self):
+    def test_deals_with_start_8(self):
         response = self.query(
             '''
                 {

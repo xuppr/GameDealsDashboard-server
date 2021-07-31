@@ -47,6 +47,7 @@ def to_full_deal_group(deals_list, start, deals_group_size):
 
 class Query(graphene.AbstractType):
     one_per_store = graphene.List(FreeDeal)
+    deal_by_id = graphene.Field(FullDeal, id = graphene.String())
     deals = graphene.Field(FullDealGroup, start=graphene.Int())
     deals_filtered_by_store = graphene.Field(FullDealGroup, start=graphene.Int(), storeID=graphene.String())
     deals_filtered_by_price_range = graphene.Field(
@@ -64,7 +65,12 @@ class Query(graphene.AbstractType):
 
         return [steam_deal, gog_deal, humble_deal]
 
-    @login_required
+    # @login_required
+    def resolve_deal_by_id(root, info, id):
+        deal = Deal.objects.get(dealID = id)
+
+        return deal
+
     def resolve_deals(root, info, start):
         deals_list = Deal.objects.all()
 
