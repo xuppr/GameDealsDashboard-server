@@ -26,12 +26,26 @@ API_ENDPOINT = 'https://www.cheapshark.com/api/1.0/deals?storeID=1,7,11&sortBy=r
 class Command(BaseCommand):
 
     def handle(self, *args, **options):
-        
-        response = requests.get(API_ENDPOINT)
 
-        if response.status_code != 200:
-            raise Exception("Cannot fetch deals from external api")
+        try:
         
-        deals_data = response.json()
+            response = requests.get(API_ENDPOINT)
 
-        make_records(deals_data=deals_data)
+            if response.status_code != 200:
+                # raise Exception("Cannot fetch deals from external api")
+                self.stdout.write(self.style.ERROR("Cannot fetch deals from external api."))
+                return
+            
+            deals_data = response.json()
+
+            make_records(deals_data=deals_data)
+
+            self.stdout.write(self.style.SUCCESS("Successfully added new deals."))
+
+            return
+        
+        except:
+
+            self.stdout.write(self.style.ERROR("An error occurred. Deals not saved."))
+
+            return 
