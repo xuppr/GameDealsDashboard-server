@@ -2,6 +2,7 @@ from django.contrib.auth import get_user_model
 import graphene
 from graphene_django import DjangoObjectType
 from django.contrib.auth.models import User
+from graphql_jwt.decorators import login_required
 
 
 class UserType(DjangoObjectType):
@@ -36,7 +37,13 @@ class CreateUser(graphene.Mutation):
         except:
             raise Exception('user not created')
 
-
-
 class Mutation(graphene.ObjectType):
     create_user = CreateUser.Field()
+
+
+class Query(graphene.AbstractType):
+    whoami = graphene.String()
+
+    @login_required
+    def resolve_whoami(root, info):
+        return info.context.user.username

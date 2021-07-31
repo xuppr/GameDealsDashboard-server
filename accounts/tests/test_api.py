@@ -2,7 +2,7 @@ import json
 from django.http import response
 from graphene_django.utils.testing import GraphQLTestCase
 from django.contrib.auth.models import User
-from django.contrib.auth import get_user_model
+from graphql_jwt.shortcuts import get_token
 
 class ApiTest(GraphQLTestCase):
 
@@ -89,6 +89,28 @@ class ApiTest(GraphQLTestCase):
 
     # usermodel = get_user_model()
     # self.assertEqual(len(usermodel.objects.all()), 1)
+  
+  def test_whoami(self):
+    user = User.objects.create(username='mockuser', password="mockpassword")
+    token   = get_token(user)
+    headers = {"HTTP_AUTHORIZATION": f"JWT {token}"}
+    
+    response = self.query(
+      '''
+        {
+          whoami
+        }
+      ''',
+
+      headers = headers
+    )
+
+    self.assertResponseNoErrors(response)
+
+    content = json.loads(response.content)
+
+    self.assertEqual(content['data']['whoami'], 'mockuser')
+
 
 
 
