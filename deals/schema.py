@@ -59,12 +59,6 @@ class Query(graphene.AbstractType):
         sort_by = graphene.String()
     )
 
-    deals_filtered_by_store = graphene.Field(FullDealGroup, start=graphene.Int(), storeID=graphene.String())
-    deals_filtered_by_price_range = graphene.Field(
-        FullDealGroup, start=graphene.Int(), low_price=graphene.Float(), high_price=graphene.Float())
-    deals_sorted_by_price = graphene.Field(FullDealGroup, start=graphene.Int())
-    deals_sorted_by_savings = graphene.Field(FullDealGroup, start=graphene.Int())
-    deals_sorted_by_deal_rating = graphene.Field(FullDealGroup, start=graphene.Int())
     #debug
     # create_records = graphene.String()
 
