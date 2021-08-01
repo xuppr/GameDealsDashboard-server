@@ -48,7 +48,17 @@ def to_full_deal_group(deals_list, start, deals_group_size):
 class Query(graphene.AbstractType):
     one_per_store = graphene.List(FreeDeal)
     deal_by_id = graphene.Field(FullDeal, id = graphene.String())
-    deals = graphene.Field(FullDealGroup, start=graphene.Int())
+    # deals = graphene.Field(FullDealGroup, start=graphene.Int())
+
+    deals = graphene.Field(
+        FullDealGroup, 
+        start = graphene.Int(),
+        storeID = graphene.String(),
+        low_price = graphene.Float(),
+        high_price = graphene.Float(),
+        sort_by = graphene.String()
+    )
+
     deals_filtered_by_store = graphene.Field(FullDealGroup, start=graphene.Int(), storeID=graphene.String())
     deals_filtered_by_price_range = graphene.Field(
         FullDealGroup, start=graphene.Int(), low_price=graphene.Float(), high_price=graphene.Float())
@@ -71,47 +81,37 @@ class Query(graphene.AbstractType):
 
         return deal
 
+    # @login_required
+    # def resolve_deals(root, info, start):
+    #     deals_list = Deal.objects.all()
+
+    #     return to_full_deal_group(deals_list, start, DEALS_PER_QUERY)
+
     @login_required
-    def resolve_deals(root, info, start):
+    def resolve_deals(
+        root, 
+        info, 
+        start, 
+        storeID = 'default', 
+        low_price = -1, 
+        high_price = -1, 
+        sort_by = 'default'):
+
         deals_list = Deal.objects.all()
 
-        return to_full_deal_group(deals_list, start, DEALS_PER_QUERY)
-
-    @login_required
-    def resolve_deals_filtered_by_store(root, info, start, storeID):
-
-        if storeID not in ['1', '7', '11']:
-            raise Exception('Invalid Store')
+        if storeID != 'default':
+            deals_list = deals_list.filter(storeID = storeID)
         
-        deals_list = Deal.objects.filter(storeID=storeID)
+        if high_price > -1:
+            deals_list = deals_list.filter(salePrice__range=[low_price, high_price])
 
-        return to_full_deal_group(deals_list, start, DEALS_PER_QUERY)
-
-    @login_required
-    def resolve_deals_filtered_by_price_range(root, info, start, low_price, high_price):
+        if sort_by == 'price':
+            deals_list = deals_list.order_by('salePrice')
         
-        deals_list = Deal.objects.filter(salePrice__range=[low_price, high_price])
+        elif sort_by in ['savings', 'dealRating']:
+            deals_list = deals_list.order_by('-' + sort_by)
 
         return to_full_deal_group(deals_list, start, DEALS_PER_QUERY)
-
-    @login_required
-    def resolve_deals_sorted_by_price(root, info, start):
-        deals_list = Deal.objects.order_by('salePrice')
-
-        return to_full_deal_group(deals_list, start, DEALS_PER_QUERY)
-
-    @login_required
-    def resolve_deals_sorted_by_savings(root, info, start):
-        deals_list = Deal.objects.order_by('-savings')
-
-        return to_full_deal_group(deals_list, start, DEALS_PER_QUERY)
-
-    @login_required
-    def resolve_deals_sorted_by_deal_rating(root, info, start):
-        deals_list = Deal.objects.order_by('-dealRating')
-
-        return to_full_deal_group(deals_list, start, DEALS_PER_QUERY)
-
 
     #debug
     # def resolve_create_records(root, info):

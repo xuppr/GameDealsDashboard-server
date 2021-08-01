@@ -231,7 +231,7 @@ class DealsQueriesTest(GraphQLTestCase):
         response = self.query(
             '''
                 {
-                    dealsFilteredByStore(start: 0, storeID: "7"){
+                    deals(start: 0, storeID: "7"){
                         dealsList {
                             title
                             storeID
@@ -256,15 +256,15 @@ class DealsQueriesTest(GraphQLTestCase):
         content = json.loads(response.content)
 
         self.assertIn('data', content)
-        self.assertIn('dealsFilteredByStore', content['data'])
-        self.assertIn('dealsList', content['data']['dealsFilteredByStore'])
-        self.assertIn('isEnd', content['data']['dealsFilteredByStore'])
+        self.assertIn('deals', content['data'])
+        self.assertIn('dealsList', content['data']['deals'])
+        self.assertIn('isEnd', content['data']['deals'])
 
-        deals = content['data']['dealsFilteredByStore']['dealsList']
+        deals = content['data']['deals']['dealsList']
 
         self.assertLessEqual(len(deals), 8)
 
-        isEnd = content['data']['dealsFilteredByStore']['isEnd']
+        isEnd = content['data']['deals']['isEnd']
         self.assertTrue(isEnd)
 
         for deal in deals:
@@ -277,7 +277,7 @@ class DealsQueriesTest(GraphQLTestCase):
         response = self.query(
             '''
                 {
-                    deals_filtered_by_store(start: 0, storeID: "5"){
+                    deals(start: 0, storeID: "5"){
                         dealsList {
                             title
                             storeID
@@ -306,7 +306,7 @@ class DealsQueriesTest(GraphQLTestCase):
         response = self.query(
             '''
                 {
-                    dealsFilteredByPriceRange(start: 0, lowPrice: 1.99, highPrice: 5.0){
+                    deals(start: 0, lowPrice: 1.99, highPrice: 5.0){
                         dealsList {
                             title
                             storeID
@@ -329,7 +329,7 @@ class DealsQueriesTest(GraphQLTestCase):
         self.assertResponseNoErrors(response)
 
         content = json.loads(response.content)
-        deals = content['data']['dealsFilteredByPriceRange']['dealsList']
+        deals = content['data']['deals']['dealsList']
 
         self.assertEqual(len(deals), 7)
 
@@ -348,7 +348,7 @@ class DealsQueriesTest(GraphQLTestCase):
         response = self.query(
             '''
                 {
-                    dealsFilteredByPriceRange(start: 0, lowPrice: 5.99, highPrice: 1.0){
+                    deals(start: 0, lowPrice: 5.99, highPrice: 1.0){
                         dealsList {
                             title
                             storeID
@@ -377,7 +377,7 @@ class DealsQueriesTest(GraphQLTestCase):
         response = self.query(
             '''
                 {
-                    dealsSortedByPrice(start: 0){
+                    deals(start: 0, sortBy: "price"){
                         dealsList {
                             title
                             storeID
@@ -400,7 +400,7 @@ class DealsQueriesTest(GraphQLTestCase):
         self.assertResponseNoErrors(response)
 
         content = json.loads(response.content)
-        deals = content['data']['dealsSortedByPrice']['dealsList']
+        deals = content['data']['deals']['dealsList']
 
         self.assertLessEqual(len(deals), 8)
 
@@ -418,7 +418,7 @@ class DealsQueriesTest(GraphQLTestCase):
         response = self.query(
             '''
                 {
-                    dealsSortedBySavings(start: 0){
+                    deals(start: 0, sortBy: "savings"){
                         dealsList {
                             title
                             storeID
@@ -441,7 +441,7 @@ class DealsQueriesTest(GraphQLTestCase):
         self.assertResponseNoErrors(response)
 
         content = json.loads(response.content)
-        deals = content['data']['dealsSortedBySavings']['dealsList']
+        deals = content['data']['deals']['dealsList']
 
         self.assertLessEqual(len(deals), 8)
 
@@ -459,7 +459,7 @@ class DealsQueriesTest(GraphQLTestCase):
         response = self.query(
             '''
                 {
-                    dealsSortedByDealRating(start: 0){
+                    deals(start: 0, sortBy: "dealRating"){
                         dealsList {
                             title
                             storeID
@@ -482,7 +482,7 @@ class DealsQueriesTest(GraphQLTestCase):
         self.assertResponseNoErrors(response)
 
         content = json.loads(response.content)
-        deals = content['data']['dealsSortedByDealRating']['dealsList']
+        deals = content['data']['deals']['dealsList']
 
         self.assertLessEqual(len(deals), 8)
 
@@ -492,5 +492,52 @@ class DealsQueriesTest(GraphQLTestCase):
             rating = deal['dealRating']
             self.assertLessEqual(rating, last_rating)
             last_rating = rating
+
+    def test_deals_filtered_by_store_price_range_and_sorted_by_deal_rating(self):
+        token   = get_token(self.user)
+        headers = {"HTTP_AUTHORIZATION": f"JWT {token}"}
+
+        response = self.query(
+            '''
+                {
+                    deals(start: 0, lowPrice: 1.99, highPrice: 5.0, storeID: "1", sortBy: "dealRating"){
+                        dealsList {
+                            title
+                            storeID
+                            salePrice
+                            normalPrice
+                            thumb
+                            dealID
+                            savings
+                            steamRatingText
+                            releaseDate
+                            dealRating
+                        }
+                        isEnd
+                    }
+                }
+            ''',
+            headers=headers
+        )
+
+        self.assertResponseNoErrors(response)
+
+        content = json.loads(response.content)
+        deals = content['data']['deals']['dealsList']
+
+        last_rating = deals[0]['dealRating']
+
+        for deal in deals[1:]:
+            self.assertEqual(deal['storeID'], '1')
+
+            price = deal['salePrice']
+            self.assertLessEqual(price, 5.0)
+            self.assertGreaterEqual(price, 1.99)
+
+            rating = deal['dealRating']
+            self.assertLessEqual(rating, last_rating)
+            last_rating = rating
+
+
     
 
