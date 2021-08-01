@@ -297,7 +297,8 @@ class DealsQueriesTest(GraphQLTestCase):
             headers=headers
         )
 
-        self.assertResponseHasErrors(response)
+        content = json.loads(response.content)
+        self.assertEqual(content['data']['deals']['dealsList'], [])
 
     def test_deals_filtered_by_price_range(self):
         token   = get_token(self.user)
@@ -368,7 +369,8 @@ class DealsQueriesTest(GraphQLTestCase):
             headers=headers
         )
 
-        self.assertResponseHasErrors(response)
+        content = json.loads(response.content)
+        self.assertEqual(content['data']['deals']['dealsList'], [])
 
     def test_deals_sorted_by_price(self):
         token   = get_token(self.user)

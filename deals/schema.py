@@ -25,6 +25,10 @@ class FullDealGroup(graphene.ObjectType):
 
 
 def to_full_deal_group(deals_list, start, deals_group_size):
+
+    if len(deals_list) == 0:
+        return FullDealGroup(deals_list=[], is_end=True)
+
     deals_count = len(deals_list)
 
     if start >= deals_count:
