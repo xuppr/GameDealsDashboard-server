@@ -17,3 +17,10 @@ Clone the project, cd into the project folder and run the following commands:
   python3 manage.py runserver
   
 ```
+
+How to test
+-----------
+
+```
+  python3 manage.py test
+```
